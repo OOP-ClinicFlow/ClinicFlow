@@ -7,6 +7,66 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <header>
+        <h1>Welcome to Clinic Flow</h1>
+    </header>
     
+    <main class="dashboard-container">
+        <!-- LEFT SIDE: Registration -->
+        <section class="registration-panel">
+            <form id="registration-form" class="regst-form">
+                <h3>Patient Registration Form</h3>
+                
+                <div class="form-content">
+                    <label for="patient-name">Full Patient Name</label>
+                    <input type="text" class="reg-form-input" id="patient-name" name="name" placeholder="Wanji Sinkala" required>
+                </div>
+
+                <div class="form-content">
+                    <label for="patient-age">Age</label>
+                    <input type="number" id="patient-age" placeholder="eg. 20" class="reg-form-input" required>
+                </div>
+
+                <div class="form-content">
+                    <label for="patient-nrc">NRC Number</label>
+                    <input type="text" id="patient-nrc" placeholder="eg. 212629/21/1" class="reg-form-input" required>
+                </div>
+
+                <div class="form-content">
+                    <label for="patient-status">Patient Status</label>
+                    <select id="patient-status" class="reg-form-input">
+                        <option value="Ordinary">Ordinary</option>
+                        <option value="Emergency">Emergency</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="reg-btn">Register</button>
+            </form>
+        </section>
+
+        <!-- RIGHT SIDE: Live Queue -->
+        <section class="queue-panel">
+            <h3>Current Queue</h3>
+            <table class="queue-table">
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Patient Name</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="queue-body">
+                    <!-- JavaScript will insert rows here -->
+                    <tr>
+                        <td colspan="5" class="empty-msg">No patients in queue.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
 </body>
 </html>
