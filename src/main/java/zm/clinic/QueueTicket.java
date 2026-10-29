@@ -30,8 +30,8 @@ public class QueueTicket {
         return urgent;
     }
 
-    public int priorityOrder() {
-    return urgent ? 1 : 2;
+        public int priorityOrder() {
+        return urgent ? 1 : 2;
     }
 
     public void setStatus(String status) {
