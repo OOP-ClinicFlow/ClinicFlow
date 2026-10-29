@@ -30,6 +30,10 @@ public class QueueTicket {
         return urgent;
     }
 
+        public int priorityOrder() {
+        return urgent ? 1 : 2;
+    }
+
     public void setStatus(String status) {
         if (!status.equals("WAITING")
                 && !status.equals("BEING_ATTENDED")
