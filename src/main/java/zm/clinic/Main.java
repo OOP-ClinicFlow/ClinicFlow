@@ -83,12 +83,16 @@ public class Main {
         // REGISTER PATIENT
         app.post("/api/queue", ctx -> {
             String fullName = ctx.queryParam("fullName");
+            String patientId = ctx.queryParam("patientId");
+            boolean urgent = "true".equalsIgnoreCase(ctx.queryParam("urgent"))
+                    || "Emergency".equalsIgnoreCase(ctx.queryParam("patientStatus"));
 
             try {
-                QueueTicket ticket = queueManager.registerPatient(fullName);
+                QueueTicket ticket = queueManager.registerPatient(
+                        patientId, fullName, urgent);
                 ctx.status(HttpStatus.CREATED);
                 ctx.json(ticket);
-            } catch (QueueException e) {
+            } catch (IllegalArgumentException e) {
                 ctx.status(HttpStatus.BAD_REQUEST);
                 ctx.result(e.getMessage());
             }
@@ -183,7 +187,7 @@ public class Main {
             }
 
             ctx.json(new MessageResponse(
-                    "Queue ticket " + ticketNumber + " removed successfully."
+                    "Queue ticket " + ticketNumber + " cancelled successfully."
             ));
         });
 
