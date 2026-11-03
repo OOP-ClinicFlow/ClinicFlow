@@ -29,7 +29,8 @@ public class FileQueueStorage {
                     + encode(patient.getPatientId()) + "|"
                     + encode(patient.getFullName()) + "|"
                     + ticket.getStatus() + "|"
-                    + ticket.isUrgent();
+                    + ticket.isUrgent() + "|"
+                    + (patient.getAge() == null ? "" : patient.getAge());
 
             lines.add(line);
         }
@@ -63,7 +64,7 @@ public class FileQueueStorage {
 
                 String[] parts = line.split("\\|", -1);
 
-                if (parts.length != 5) {
+                if (parts.length != 5 && parts.length != 6) {
                     throw new IllegalArgumentException(
                             "Invalid record format.");
                 }
@@ -83,7 +84,9 @@ public class FileQueueStorage {
                         Boolean.parseBoolean(parts[4]);
 
                 Patient patient =
-                        new Patient(patientId, fullName);
+                        new Patient(patientId, fullName,
+                                parts.length == 6 && !parts[5].isBlank()
+                                        ? Integer.valueOf(parts[5]) : null);
 
                 QueueTicket ticket =
                         new QueueTicket(ticketNumber, patient);

@@ -13,6 +13,7 @@ public class QueueManager {
 
     private static final Pattern GENERATED_TICKET_NUMBER =
             Pattern.compile("^Q(\\d+)$");
+    private static final int SENIOR_AGE_THRESHOLD = 75;
 
     private final Map<String, QueueTicket> tickets = new LinkedHashMap<>();
     private final FileQueueStorage storage;
@@ -38,11 +39,17 @@ public class QueueManager {
 
     public synchronized QueueTicket registerPatient(
             String patientId, String fullName, boolean urgent) {
+        return registerPatient(patientId, fullName, urgent, null);
+    }
+
+    public synchronized QueueTicket registerPatient(
+            String patientId, String fullName, boolean urgent, Integer age) {
         String ticketNumber = formatTicketNumber(nextTicketNumber);
         Patient patient = new Patient(
                 patientId == null || patientId.isBlank()
                         ? ticketNumber : patientId.trim(),
-                fullName == null ? null : fullName.trim());
+                fullName == null ? null : fullName.trim(),
+                age);
 
         QueueTicket ticket = urgent
                 ? new UrgentTicket(ticketNumber, patient)
@@ -64,9 +71,23 @@ public class QueueManager {
         List<QueueTicket> result = new ArrayList<>(tickets.values());
         result.sort(Comparator
                 .comparingInt((QueueTicket ticket) -> statusOrder(ticket.getStatus()))
-                .thenComparingInt(ticket -> "WAITING".equals(ticket.getStatus())
-                        ? ticket.priorityOrder() : 0));
+                .thenComparingInt(this::waitingPriorityOrder));
         return result;
+    }
+
+    private int waitingPriorityOrder(QueueTicket ticket) {
+        if (!QueueTicket.WAITING.equals(ticket.getStatus())) {
+            return 0;
+        }
+        if (ticket.isUrgent()) {
+            return 0;
+        }
+
+        Integer age = ticket.getPatient().getAge();
+        if (age != null && age > SENIOR_AGE_THRESHOLD) {
+            return 1;
+        }
+        return ticket.priorityOrder();
     }
 
     public synchronized QueueTicket findTicket(String ticketNumber) {
@@ -196,4 +217,5 @@ public class QueueManager {
             throw new QueueException("Saved ticket number is out of range.", e);
         }
     }
+
 }

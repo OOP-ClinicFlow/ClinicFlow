@@ -1,7 +1,8 @@
+import zm.clinic.Main;
 
 public class App {
 
-    public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
+    public static void main(String[] args) {
+        Main.main(args);
     }
 }

@@ -33,6 +33,16 @@ system property to use a different file.
 
 Waiting urgent tickets are ordered ahead of standard tickets while retaining
 registration order within each priority. Cancelling a ticket marks it
-`CANCELLED` and keeps the record for queue history. Existing API clients can
-continue registering with `fullName`; `patientId` and `urgent=true` (or
-`patientStatus=Emergency`) are optional query parameters.
+`CANCELLED` and keeps the record for queue history. Run `App` to start the
+Javalin application on port 7070; it serves the registration page at `/`.
+`App` delegates to `zm.clinic.Main`, which owns the API and queue.
+The project uses Maven to provide Javalin's JSON mapper; reload the Maven
+project after changing dependencies, then restart the app so the updated
+runtime classpath is used.
+
+The registration form sends the patient's name, age, NRC, and ordinary or
+emergency status to `POST /api/queue`. The queue page displays those details
+and supports attending, completing, and cancelling tickets. Age is persisted
+for newly registered patients; previously saved queue records remain readable.
+Existing API clients can continue registering with `fullName`; `patientId` and
+`urgent=true` (or `patientStatus=Emergency`) remain supported query parameters.

@@ -2,99 +2,44 @@ package zm.clinic;
 
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.staticfiles.Location;
 
 public class Main {
 
     public static void main(String[] args) {
 
         QueueManager queueManager = new QueueManager();
-        AuthManager authManager = new AuthManager();
-
         Javalin app = Javalin.create(config -> {
-            config.bundledPlugins.enableCors(cors -> {
-                cors.addRule(it -> it.anyHost());
-            });
-        });
-
-        app.get("/", ctx -> {
-            ctx.result("Clinic Queue Management System Backend is Running!");
-        });
-
-        // LOGIN
-        app.post("/api/auth/login", ctx -> {
-            LoginRequest request = ctx.bodyAsClass(LoginRequest.class);
-
-            String token = authManager.login(
-                    request.getUsername(),
-                    request.getPassword()
-            );
-
-            if (token == null) {
-                ctx.status(HttpStatus.UNAUTHORIZED);
-                ctx.json(new MessageResponse("Incorrect username or password."));
-                return;
-            }
-
-            AuthManager.StaffAccount staff =
-                    authManager.getStaffForToken(token);
-
-            ctx.json(new LoginResponse(
-                    token,
-                    staff.getUsername(),
-                    staff.getRole()
-            ));
-        });
-
-        // SIGN OUT
-        app.post("/api/auth/logout", ctx -> {
-            String token = getToken(ctx.header("Authorization"));
-
-            if (token == null || !authManager.logout(token)) {
-                ctx.status(HttpStatus.UNAUTHORIZED);
-                ctx.json(new MessageResponse("You are not signed in."));
-                return;
-            }
-
-            ctx.json(new MessageResponse("Signed out successfully."));
-        });
-
-        // Protect queue routes that include a path parameter or sub-route.
-        app.before("/api/queue/*", ctx -> {
-            String token = getToken(ctx.header("Authorization"));
-
-            if (authManager.getStaffForToken(token) == null) {
-                ctx.status(HttpStatus.UNAUTHORIZED);
-                ctx.json(new MessageResponse("Please sign in to use the queue."));
-                ctx.skipRemainingHandlers();
-            }
-        });
-
-        // Protect the exact /api/queue route as well.
-        app.before("/api/queue", ctx -> {
-            String token = getToken(ctx.header("Authorization"));
-
-            if (authManager.getStaffForToken(token) == null) {
-                ctx.status(HttpStatus.UNAUTHORIZED);
-                ctx.json(new MessageResponse("Please sign in to use the queue."));
-                ctx.skipRemainingHandlers();
-            }
+            config.staticFiles.add("/public", Location.CLASSPATH);
         });
 
         // REGISTER PATIENT
         app.post("/api/queue", ctx -> {
-            String fullName = ctx.queryParam("fullName");
-            String patientId = ctx.queryParam("patientId");
-            boolean urgent = "true".equalsIgnoreCase(ctx.queryParam("urgent"))
-                    || "Emergency".equalsIgnoreCase(ctx.queryParam("patientStatus"));
-
             try {
+                RegistrationRequest request = ctx.body().isBlank()
+                        ? null : ctx.bodyAsClass(RegistrationRequest.class);
+                String fullName = request == null
+                        ? ctx.queryParam("fullName")
+                        : request.name != null ? request.name : request.fullName;
+                String patientId = request == null
+                        ? ctx.queryParam("patientId")
+                        : request.nrc != null ? request.nrc : request.patientId;
+                String patientStatus = request == null
+                        ? ctx.queryParam("patientStatus") : request.patientStatus;
+                String priority = request == null ? null : request.priority;
+                boolean urgent = request != null && request.urgent
+                        || "true".equalsIgnoreCase(ctx.queryParam("urgent"))
+                        || "Emergency".equalsIgnoreCase(patientStatus)
+                        || "Emergency".equalsIgnoreCase(priority)
+                        || "URGENT".equalsIgnoreCase(priority);
+                Integer age = request == null ? null : request.age;
                 QueueTicket ticket = queueManager.registerPatient(
-                        patientId, fullName, urgent);
+                        patientId, fullName, urgent, age);
                 ctx.status(HttpStatus.CREATED);
                 ctx.json(ticket);
             } catch (IllegalArgumentException e) {
                 ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.result(e.getMessage());
+                ctx.json(new MessageResponse(e.getMessage()));
             }
         });
 
@@ -191,65 +136,20 @@ public class Main {
             ));
         });
 
-        app.start(7070);
-        System.out.println("Server started at http://localhost:7070");
+        int port = Integer.getInteger("clinicflow.port", 7070);
+        app.start(port);
+        System.out.println("Server started at http://localhost:" + port);
     }
 
-    private static String getToken(String authorizationHeader) {
-        if (authorizationHeader == null
-                || !authorizationHeader.startsWith("Bearer ")) {
-            return null;
-        }
-
-        return authorizationHeader.substring("Bearer ".length()).trim();
-    }
-
-    public static class LoginRequest {
-        private String username;
-        private String password;
-
-        public LoginRequest() {
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-    }
-
-    public static class LoginResponse {
-        private final String token;
-        private final String username;
-        private final String role;
-
-        public LoginResponse(String token, String username, String role) {
-            this.token = token;
-            this.username = username;
-            this.role = role;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getRole() {
-            return role;
-        }
+    public static class RegistrationRequest {
+        public String name;
+        public String fullName;
+        public Integer age;
+        public String nrc;
+        public String patientId;
+        public String priority;
+        public String patientStatus;
+        public boolean urgent;
     }
 
     public static class MessageResponse {
@@ -263,4 +163,4 @@ public class Main {
             return message;
         }
     }
-    }
+}
