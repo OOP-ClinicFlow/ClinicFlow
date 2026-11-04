@@ -5,6 +5,7 @@ const queueMessage = document.getElementById("queue-message");
 const searchInput = document.getElementById("queue-search");
 const statusFilter = document.getElementById("status-filter");
 const refreshButton = document.getElementById("refresh-queue");
+const clearQueueButton = document.getElementById("clear-queue");
 const registerButton = document.getElementById("register-button");
 let queueTickets = [];
 
@@ -68,6 +69,7 @@ function updateSummary(tickets) {
     document.getElementById("completed-count").textContent = counts.completed;
     document.getElementById("queue-count").textContent =
         `${tickets.length} ${tickets.length === 1 ? "patient" : "patients"}`;
+    clearQueueButton.disabled = tickets.length === 0;
 }
 
 function filteredTickets() {
@@ -223,6 +225,25 @@ refreshButton.addEventListener("click", () => {
         queueMessage.textContent = error.message;
         queueMessage.classList.add("error");
     });
+});
+
+clearQueueButton.addEventListener("click", async () => {
+    if (!window.confirm("Clear the entire queue? This will remove all tickets.")) {
+        return;
+    }
+
+    clearQueueButton.disabled = true;
+    queueMessage.textContent = "";
+    queueMessage.classList.remove("error");
+    try {
+        await requestJson("/api/queue/reset", { method: "POST" });
+        await loadQueue();
+        queueMessage.textContent = "Queue cleared. The next patient will receive Q001.";
+    } catch (error) {
+        queueMessage.textContent = error.message;
+        queueMessage.classList.add("error");
+        clearQueueButton.disabled = queueTickets.length === 0;
+    }
 });
 
 loadQueue().catch(error => {

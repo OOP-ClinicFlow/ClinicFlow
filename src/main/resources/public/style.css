@@ -392,6 +392,31 @@ h1 {
     padding: 20px 22px 16px;
 }
 
+.queue-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clear-queue-button {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid #f0c9cd;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--red);
+    font-weight: 600;
+}
+
+.clear-queue-button:hover:not(:disabled) {
+    background: #fff5f5;
+}
+
+.clear-queue-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .icon-button {
     display: grid;
     width: 36px;

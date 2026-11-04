@@ -1,27 +1,21 @@
 # ClinicFlow
 A clinic queue management system built with Java and Javalin — register patients, issue unique tickets, track statuses, and manage urgent cases digitally.
 
-## Project structure
-
-```text
-pom.xml
-src/
-  main/
-    java/
-      App.java
-      zm/clinic/
-        Main.java
-        Patient.java
-        QueueTicket.java
-        QueueManager.java
-        QueueException.java
-        FileQueueStorage.java
-    resources/
-      public/
-        app.js
-        index.html
-        style.css
-```
+## GROUP MEMBERS
+  |-----------------------------------------------------------|
+# | Member Name            | ID          | Programme of study |
+  |-----------------------------------------------------------|
+  |1. Mercyton Sinkala     | 2420931     | BSE                |
+  |-----------------------------------------------------------|
+  |2. Prince Kanyembo      | 2420926     | BSE                |
+  |-----------------------------------------------------------|
+  |3. Amos Kabashi         | 2420961     | BSE                |
+  |-----------------------------------------------------------|
+  |4. John B Mumba         | 2420949     | BSE                |
+  |-----------------------------------------------------------|
+  |5. Valarie Kasongo      | 2410073     | BSE                |
+  |-----------------------------------------------------------|
+  
 
 ## Queue workflow
 
@@ -36,6 +30,8 @@ registration order within each priority. Cancelling a ticket marks it
 `CANCELLED` and keeps the record for queue history. Run `App` to start the
 Javalin application on port 7070; it serves the registration page at `/`.
 `App` delegates to `zm.clinic.Main`, which owns the API and queue.
+The dashboard's **Clear all** action empties the saved queue after confirmation
+and restarts ticket numbering at Q001.
 The project uses Maven to provide Javalin's JSON mapper; reload the Maven
 project after changing dependencies, then restart the app so the updated
 runtime classpath is used.
