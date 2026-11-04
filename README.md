@@ -16,6 +16,41 @@ A clinic queue management system built with Java and Javalin — register patien
   |5. Valarie Kasongo      | 2410073     | BSE                |
   |-----------------------------------------------------------|
   
+  # THE PROBLEM
+  Small clinics often manage patient queues manually using paper notebooks, which leads to lost records, unclear waiting times, and missed urgent cases. ClinicFlow solves this for receptionists and clinic staff by providing a digital dashboard that registers patients, issues unique tickets, and automatically organizes the queue so that emergencies and senior citizens are prioritized correctly.
+
+  # HOW TO RUN
+  Follow the following steps to run the project locally:
+
+1. Install Prerequisites: Ensure you have Java (JDK 17 or higher) and Maven installed on your computer.
+
+2. Clone the Repository: Open your terminal and run git clone https://github.com/OOP-ClinicFlow/ClinicFlow
+
+3. Open the Project: Open the cloned folder in your preferred IDE (IntelliJ IDEA, Eclipse, or VS Code).
+
+4. Run the Server: Locate the App.java (or Main.java) file and run its main method. Alternatively, run mvn javalin:run in the terminal.
+
+5. Access the Frontend: Open your web browser and navigate to http://localhost:7070. The queue dashboard will load, and you can start registering patients.
+
+# OUR CLASSES
+Here is a breakdown of the classes that power our backend:
+
+`Patient`: Stores the patient's personal information (ID, full name, age) and enforces encapsulation through validation in its setters.
+
+`QueueTicket`: The parent class representing a patient's place in the queue, storing the ticket number, status, and urgency.
+
+`StandardTicket`: Inherits from QueueTicket and defines the standard priority order for regular patients.
+
+`UrgentTicket`: Inherits from QueueTicket and overrides the priority order to ensure emergency patients are seen first (Polymorphism).
+
+`QueueManager`: The core logic class that handles registering patients, generating unique ticket numbers, updating statuses, and sorting the queue.
+
+`FileQueueStorage`: Handles data persistence by saving queue records to a local file and loading them back into memory when the server restarts.
+
+`QueueException & QueueOperationException`: Custom exceptions used to handle invalid operations (like empty names or failed file saves) and return clean error messages to the user.
+
+`Main`: Configures the Javalin server, defines all REST API endpoints, and serves the HTML/JS frontend.
+
 
 ## Queue workflow
 
